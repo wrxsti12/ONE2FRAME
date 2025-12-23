@@ -1,0 +1,99 @@
+{
+  "name": "ONE2FRAME Gmail to Notion Booking",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {
+          "from": "nf3xedk12@gmail.com",
+          "subject": "ONE2FRAME"
+        },
+        "format": "simple"
+      },
+      "name": "Gmail Trigger",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "// 取得郵件內容\nconst text = $input.item.json.text || $input.item.json.snippet || '';\nconst lines = text.split('\\n').map(l => l.trim()).filter(Boolean);\n\n// 解析函式：根據前綴抓取值\nfunction pick(prefix) {\n  const line = lines.find(l => l.includes(prefix));\n  if (!line) return '';\n  return line.split(prefix)[1]?.trim() || '';\n}\n\n// 抓取各欄位（根據你 EmailJS 模板的實際格式調整）\nconst userName = pick('姓名：') || pick('Name：') || pick('姓名:');\nconst userIG = pick('IG：') || pick('IG帳號：') || pick('Instagram：');\nconst shootType = pick('拍攝類型：') || pick('車種：') || pick('類型：');\nconst shootDate = pick('拍攝日期：') || pick('日期：'); // 格式: 2025-12-06\nconst shootClock = pick('拍攝時段：') || pick('時段：'); // 格式: 14:00-16:00\nconst plan = pick('方案：') || pick('Plan：');\nconst message = pick('備註：') || pick('需求：') || pick('Message：');\nconst userEmail = pick('Email：') || pick('信箱：');\n\n// 組合完整時間（ISO 8601 格式給 Notion）\nlet startTime = null;\nlet endTime = null;\n\nif (shootDate && shootClock) {\n  if (shootClock.includes('-')) {\n    const [start, end] = shootClock.split('-').map(s => s.trim());\n    startTime = `${shootDate}T${start}:00+08:00`;\n    endTime = `${shootDate}T${end}:00+08:00`;\n  } else {\n    startTime = `${shootDate}T${shootClock}:00+08:00`;\n  }\n} else if (shootDate) {\n  startTime = `${shootDate}T00:00:00+08:00`;\n}\n\n// 組合 Notion Page 標題\nconst pageTitle = `${userName || '未命名'} - ${shootType || plan || '預約'}`;\n\n// 回傳結構化資料\nreturn {\n  json: {\n    // Notion 用\n    pageTitle,\n    userName,\n    userIG,\n    userEmail,\n    shootType,\n    shootDate,\n    shootClock,\n    plan,\n    message,\n    startTime,\n    endTime,\n    // 原始郵件資訊（備用）\n    emailSubject: $input.item.json.subject,\n    emailFrom: $input.item.json.from,\n    emailDate: $input.item.json.date\n  }\n};"
+      },
+      "name": "Parse Email Content",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "resource": "page",
+        "databaseId": "2a281e08da2080a981afee1cd0b172a9",
+        "title": "={{ $json.pageTitle }}",
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Client Email",
+              "emailValue": "={{ $json.userEmail }}"
+            },
+            {
+              "key": "Date",
+              "dateValue": "={{ $json.startTime }}",
+              "dateEndValue": "={{ $json.endTime }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Create Notion Page",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2,
+      "position": [650, 300],
+      "credentials": {
+        "notionApi": {
+          "id": "YOUR_NOTION_CREDENTIAL_ID",
+          "name": "Notion account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Parse Email Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Email Content": {
+      "main": [
+        [
+          {
+            "node": "Create Notion Page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

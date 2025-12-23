@@ -1,0 +1,38 @@
+/* 📂 src/assets/reset.css */
+
+/* CSS Reset 基礎設定 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* 解決背景白邊問題的核心設定 */
+html, body {
+  height: 100%;
+  width: 100%;
+  overflow-x: hidden; /* ✅ 防止橫向白邊 */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #000; /* ✅ 為避免預設白背景可設定為黑，視需求調整 */
+}
+
+/* 圖片、影片等預設限制 */
+img, picture, video, canvas, svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* 表單元素一致化 */
+input, button, textarea, select {
+  font: inherit;
+  color: inherit;
+}
+
+/* 連結樣式清除 */
+a {
+  color: inherit;
+  text-decoration: none;
+}
