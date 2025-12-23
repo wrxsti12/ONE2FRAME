@@ -39,9 +39,20 @@
   data-aos-duration="800"
 >
   立即預約
-</router-link>
 
-    </div>
+      </router-link>
+      <div class="sub-cta">
+        <router-link to="/ai" class="ai-link">
+          ONE2FRAME拍攝顧問
+        </router-link>
+      </div>
+
+      <router-link to="/ai" class="secondary-link">
+        不確定選哪個？ 先用ONE2FRAME導覽 30 秒 →
+      </router-link>
+
+
+      </div>
   </section>
 </template>
 
@@ -57,7 +68,9 @@ function scrollToContact() {
 </script>
 
 <style scoped>
-
+/* ===============================
+   品牌理念文字
+   =============================== */
 .brand-philosophy-text {
   font-size: 1.1rem;
   line-height: 2;
@@ -65,7 +78,7 @@ function scrollToContact() {
   font-family: 'Cormorant Garamond', serif;
   letter-spacing: 0.03rem;
   max-width: 720px;
-  margin: 2rem auto 0;
+  margin: 2rem auto 1.4rem; /* ✅ 原本太大：把 CTA 拉太遠 → 這裡縮短 */
   text-align: center;
   padding: 0 1.2rem;
 }
@@ -75,35 +88,15 @@ function scrollToContact() {
   margin-bottom: 0.6rem;
 }
 
-@media (max-width: 768px) {
-  .brand-philosophy-text {
-    font-size: 1rem;
-    line-height: 1.85;
-    padding: 0 1.2rem;
-  }
-
-  .brand-philosophy-text span {
-    margin-bottom: 0.7rem;
-  }
-}
-.brand-philosophy-text {
-  font-size: 1.1rem;
-  line-height: 2;
-  color: rgba(255, 255, 255, 0.9);
-  font-family: 'Cormorant Garamond', serif;
-  letter-spacing: 0.03rem;
-  max-width: 720px;
-  margin: 2rem auto 2.8rem; /* ✅ 下方加大間距 */
-  text-align: center;
-  padding: 0 1.2rem;
-}
-
+/* ===============================
+   Home 區塊（依你要求保留核心）
+   =============================== */
 .home {
   width: 100vw;
-  height: 100vh;
+  height: 100vh;                 /* ⛔ 不刪，依你要求保留 */
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;        /* ✅ 避免整包硬置中造成節奏怪 */
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -111,9 +104,13 @@ function scrollToContact() {
   color: white;
   overflow: hidden;
   margin: 0;
-  padding: 0;
-}
 
+  /* ✅ 補 navbar + 呼吸感 */
+  padding-top: 96px;
+  padding-bottom: 96px;
+
+  box-sizing: border-box;         /* ✅ 避免 padding 撐爆 100vh */
+}
 
 .home::before {
   content: '';
@@ -132,6 +129,9 @@ function scrollToContact() {
   text-align: center;
 }
 
+/* ===============================
+   標題區
+   =============================== */
 .main-title {
   font-size: 3.5rem;
   font-weight: 700;
@@ -140,8 +140,8 @@ function scrollToContact() {
   font-family: 'Playfair Display', serif;
   text-align: center;
   word-break: keep-all;
-  margin-bottom: 1.5rem;
   white-space: nowrap;
+  margin-bottom: 1.5rem;
 }
 
 .subtitle {
@@ -151,40 +151,14 @@ function scrollToContact() {
   letter-spacing: 0.35rem;
   color: #ccc;
   opacity: 0.9;
-  margin-bottom: 2rem;
+  margin-bottom: 1.4rem; /* ✅ 稍微收斂，讓 CTA 區塊更集中 */
 }
 
-.brand-philosophy {
-  margin-top: 2rem;
-  max-width: 720px;
-  margin-left: auto;
-  margin-right: auto;
-  text-align: center;
-}
-
-.hero-title {
-  font-size: 2.4rem;
-  font-weight: 700;
-  line-height: 1.6;
-  letter-spacing: 0.08rem;
-  text-align: center;
-  padding-bottom: 2rem;
-}
-
-.line {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.3rem;
-  font-weight: 400;
-  letter-spacing: 0.05rem;
-  background: linear-gradient(90deg, #ffffff, #d9d9d9, #ffffff);
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  opacity: 0.85;
-}
-
+/* ===============================
+   CTA（立即預約）— 讓它更靠近上方文案
+   =============================== */
 .cta-btn {
-  margin-top: 1.8rem;
+  margin-top: 0.6rem; /* ✅ 原本 1.8rem 太遠：把 CTA 往上拉 */
   background-color: transparent;
   color: #ffffff;
   padding: 0.8rem 2rem;
@@ -196,6 +170,11 @@ function scrollToContact() {
   transition: all 0.3s ease;
   font-family: 'Cormorant Garamond', serif;
   letter-spacing: 0.08rem;
+
+  /* ✅ CTA 以下你指定的穩定版 */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .cta-btn:hover {
@@ -203,59 +182,112 @@ function scrollToContact() {
   border-color: rgba(255, 255, 255, 0.6);
   box-shadow: 0 4px 18px rgba(255, 255, 255, 0.15);
 }
-.main-title {
-  font-size: 3.5rem;
-  font-weight: 700;
-  letter-spacing: 0.6rem;
-  text-transform: uppercase;
-  font-family: 'Playfair Display', serif;
+
+/* ===============================
+   CTA 以下：統一成一個導覽區塊
+   =============================== */
+.sub-cta {
+  margin-top: 12px;              /* ✅ 原本 18px：再收斂，整體更舒服 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
   text-align: center;
-
-  /* ✅ 加上的兩行 ↓↓↓ */
-  word-break: keep-all;
-  white-space: nowrap;
-
-  margin-bottom: 1.5rem;
 }
 
-.brand-philosophy {
-  margin-top: 2rem;
-  max-width: 720px;
-  margin-left: auto;
-  margin-right: auto;
-  text-align: center;
-  padding: 0 1rem;
+/* secondary-link 不在 sub-cta 裡 → 用兄弟選擇器統一節奏 */
+.sub-cta + .secondary-link {
+  margin-top: 0;
 }
 
+/* 第一行：ONE2FRAME 拍攝顧問（低干擾導覽） */
+.ai-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-family: 'Cormorant Garamond', serif;
+  letter-spacing: 0.06rem;
+  font-size: 1rem;
 
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(8px);
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.ai-link:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 1);
+}
+
+/* 第二行：提示型導覽文字 */
+.secondary-link {
+  display: inline-block;
+  font-family: 'Cormorant Garamond', serif;
+  letter-spacing: 0.05rem;
+  font-size: 0.98rem;
+
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+  padding-bottom: 2px;
+
+  transition: color 0.2s ease, border-bottom-color 0.2s ease;
+}
+
+.secondary-link:hover {
+  color: rgba(255, 255, 255, 0.9);
+  border-bottom-color: rgba(255, 255, 255, 0.3);
+}
+
+/* ===============================
+   RWD
+   =============================== */
 @media (max-width: 768px) {
   .main-title {
     font-size: 2rem;
     letter-spacing: 0.2rem;
-    white-space: normal; /* ✅手機上允許換行 */
+    white-space: normal;
   }
 
   .subtitle {
     font-size: 1rem;
     padding: 0 1.2rem;
-  }
-
-  .hero-title {
-    font-size: 1.2rem;
-    line-height: 1.6;
+    margin-bottom: 1.1rem;
   }
 
   .brand-philosophy-text {
     font-size: 1rem;
     line-height: 1.85;
     padding: 0 1.2rem;
-    margin-bottom: 2.5rem; /* ✅ 手機下間距也拉開 */
+    margin: 1.6rem auto 1.1rem; /* ✅ 手機也把 CTA 拉近 */
   }
 
   .cta-btn {
     font-size: 1rem;
     padding: 0.6rem 1.5rem;
+    margin-top: 0.4rem;
+  }
+
+  .sub-cta {
+    margin-top: 10px;
+    gap: 8px;
+  }
+
+  .ai-link {
+    font-size: 0.95rem;
+    padding: 9px 12px;
+  }
+
+  .secondary-link {
+    font-size: 0.95rem;
   }
 }
-
 </style>
