@@ -18,7 +18,7 @@
 
 
 
-      <form @submit.prevent="sendEmail" ref="form" class="contact-form" data-aos="fade-up" data-aos-delay="300">
+      <form @submit.prevent="handleSubmit" ref="form" class="contact-form" data-aos="fade-up" data-aos-delay="300">
 
         <div class="input-group" data-aos="fade-up" data-aos-delay="150">
 
@@ -260,361 +260,274 @@
 
 <script setup>
 
-import { ref, computed, onMounted, watch } from 'vue'
-
+import { ref, computed, watch, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
-
 import emailjs from '@emailjs/browser'
-
 import { supabase } from '../supabase.js'
-
 import marbleBg from '../assets/marble.jpg'
-
 import '@vuepic/vue-datepicker/dist/main.css'
-
 import Datepicker from '@vuepic/vue-datepicker'
 
-
-
 /* ---------- state ---------- */
-
 const form = ref(null)
 
 const shootPlan = ref('')
 const planDisplay = ref('')
 
 const isSubmitting = ref(false)
-
 const done = ref(false)
 
 const userName = ref('')
-
 const userIG = ref('')
-
+const userEmail = ref('')
 const userNote = ref('')
 
 const shootType = ref('')
-
-const shootDate = ref('')       // YYYY-MM-DD 字串形式
-
+const shootDate = ref('')
 const shootClock = ref('')
-
-const selectedDate = ref(null)  // Datepicker 綁定
+const selectedDate = ref(null)
 
 const route = useRoute()
-
 const selectedPlan = ref('')
 
 const statusMessage = ref('')
-
 const statusType = ref('')
 
-// ✅ 新增：Email state
-const userEmail = ref('')
-
-// ✅ 新增：Email 驗證
+/* ---------- Email 驗證 ---------- */
 const isValidEmail = ref(true)
 const showEmailError = ref(false)
 
 const emailErrorMessage = computed(() =>
   showEmailError.value ? '請輸入有效 Email（例如 name@gmail.com）' : ''
 )
+// 修改函數，讓它能接收 Public Key
+
 
 /* ---------- IG 驗證 ---------- */
-
 const isValidIG = ref(true)
-
 const showIGError = ref(false)
 
 const errorMessage = computed(() =>
-
-  showIGError.value ? '請輸入有效 IG 名稱（3~30字，只能包含英文、數字、. 和 _）' : ''
-
+  showIGError.value
+    ? '請輸入有效 IG 名稱（3~30字，只能包含英文、數字、. 和 _）'
+    : ''
 )
 
 function handleIGInput() {
-
   const pattern = /^[A-Za-z0-9._]{3,30}$/
-
   isValidIG.value = pattern.test(userIG.value)
-
   showIGError.value = userIG.value !== '' && !isValidIG.value
-
-}
-
-function handleEmailInput() {
-  // 簡潔但夠用的 Email regex
-  const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
-  isValidEmail.value = pattern.test(userEmail.value)
-  showEmailError.value = userEmail.value !== '' && !isValidEmail.value
 }
 
 /* ---------- 日期同步 ---------- */
-
 watch(selectedDate, (val) => {
-
   if (!val) {
-
     shootDate.value = ''
-
     return
-
   }
-
   const yyyy = val.getFullYear()
-
   const mm = String(val.getMonth() + 1).padStart(2, '0')
-
   const dd = String(val.getDate()).padStart(2, '0')
-
   shootDate.value = `${yyyy}-${mm}-${dd}`
-
 })
 
-
-
 /* ---------- 假日限制 ---------- */
-
 const restrictedPlans = ['動態攝影', 'Reels短片拍攝']
 
 function isWeekend(dateString) {
-
   if (!dateString) return false
-
   const day = new Date(dateString).getDay()
-
   return day === 6 || day === 0
-
 }
 
 const isWeekendRestricted = computed(() =>
-
   restrictedPlans.includes(selectedPlan.value)
-
 )
 
-
-
 watch([shootDate, selectedPlan], () => {
-
   if (isWeekendRestricted.value && shootDate.value && !isWeekend(shootDate.value)) {
-
     selectedDate.value = null
-
     shootDate.value = ''
-
   }
-
 })
-
-
 
 function disableWeekdays(date) {
-
-  const day = date.getDay()
-
-  return day !== 6 && day !== 0
-
+  return ![0, 6].includes(date.getDay())
 }
-
-
 
 /* ---------- 顯示完整時間 ---------- */
-
 const shootFullTime = computed(() => {
-
   if (!shootDate.value || !shootClock.value) return ''
-
-  const [year, month, day] = shootDate.value.split('-')
-
-  return `${year}年${month}月${day}日 ${shootClock.value}`
-
+  const [y, m, d] = shootDate.value.split('-')
+  return `${y}年${m}月${d}日 ${shootClock.value}`
 })
 
-
-
-/* ---------- 送出行為 ---------- */
-
-async function sendEmail() {
-
-  if (isSubmitting.value) return
-
-
-
-  // 驗證
-
+/* ---------- ✅ 驗證邏輯（抽乾淨） ---------- */
+function validateForm() {
   handleIGInput()
-
-  if (!isValidEmail.value) {
-  statusMessage.value = '請輸入正確的 Email'
-  statusType.value = 'error'
-  return
-}
+  handleEmailInput()
 
   if (!isValidIG.value) {
-
     statusMessage.value = '請輸入正確的 IG 名稱'
-
     statusType.value = 'error'
-
-    return
-
+    return false
   }
 
-  if (!userName.value || !userIG.value || !userEmail.value || !shootType.value || !shootDate.value || !shootClock.value) {
+  if (!isValidEmail.value) {
+    statusMessage.value = '請輸入正確的 Email'
+    statusType.value = 'error'
+    return false
+  }
 
+  if (
+    !userName.value ||
+    !userIG.value ||
+    !userEmail.value ||
+    !shootType.value ||
+    !shootDate.value ||
+    !shootClock.value
+  ) {
     statusMessage.value = '請完整填寫所有必填欄位'
-
     statusType.value = 'error'
-
-    return
-
+    return false
   }
 
-
-
-  // 樂觀 UI
-
-  isSubmitting.value = true
-
-  done.value = true
-
-  statusMessage.value = ''
-
-  statusType.value = ''
-
-
-
-  try {
-
-    // 同步隱藏欄位，只保留 shoot_full_time 給 EmailJS
-
-    if (form.value) {
-
-      const fullTimeInput = form.value.querySelector('input[name="shoot_full_time"]')
-
-      if (fullTimeInput) {
-
-        fullTimeInput.setAttribute('value', shootFullTime.value)
-
-        fullTimeInput.value = shootFullTime.value
-
-      }
-
-
-
-      // Plan 欄位同步
-
-      const planInput = form.value.querySelector('input[name="plan"]')
-
-      if (planInput && selectedPlan.value) {
-
-        planInput.setAttribute('value', selectedPlan.value)
-
-        planInput.value = selectedPlan.value
-
-      }
-
-    }
-
-
-
-    // 發送 EmailJS
-    
-    await emailjs.sendForm('service_sutp5s9', 'template_gw85rci', form.value, '3DH3YZGxSTMbs0gwQ')
-
-
-
-    // 寫入 Supabase
-
-    const { error } = await supabase.from('reservations').insert([
-  {
-    user_name: userName.value,
-    user_ig: userIG.value,
-    user_email: userEmail.value,
-
-
-    // 拍攝結構（核心）
-    shoot_type: shootType.value,                         // 靜態攝影 / 動態Rolling / Reels短片紀錄
-    shoot_plan: route.query.shoot_plan || '',            // Essential / Complete
-    plan_display: selectedPlan.value,                    // 動態Rolling - Complete（給人看）
-
-    // 時程
-    shoot_date: shootDate.value,                          // YYYY-MM-DD
-    shoot_clock: shootClock.value,
-    shoot_full_time: shootFullTime.value,                 // 完整顯示字串
-
-    // 備註
-    message: userNote.value
-  }
-])
-
-
-    if (error) console.error('[DB 寫入失敗]', error)
-
-    else console.log('[DB 寫入成功]')
-
-  } catch (err) {
-
-    console.error('[送出過程錯誤]', err)
-
-  } finally {
-
-    // 保留按鈕 disabled
-
-    isSubmitting.value = true
-
-  }
-
+  return true
 }
 
 
 
-/* ---------- 初始化 ---------- */
+/* ---------- 初始化（方案同步） ---------- */
 const typeMap = {
   Static: '靜態攝影',
   Motion: '動態Rolling',
   Reels: 'Reels短片紀錄'
 }
 
-// ✅ 用 watchEffect 比 onMounted 更穩：重新進入頁面/參數改變都能吃到
-import { watchEffect } from 'vue'
-
 watchEffect(() => {
-  // 1️⃣ 先讀 query（防 undefined）
   const qt = route.query.shoot_type || route.query.shoot_title || ''
   const qp = route.query.shoot_plan || ''
 
-  // 2️⃣ 再做轉換（一定要在使用前宣告）
-  const typeLabel = typeMap[String(qt)] || String(qt) || ''
-  const planLabel = String(qp) || ''
+  const typeLabel = typeMap[String(qt)] || String(qt)
+  const planLabel = String(qp)
 
-  // 3️⃣ 寫入對應 ref（給 hidden / DB / EmailJS 用）
   shootPlan.value = planLabel
-
-  planDisplay.value =
-    (typeLabel && planLabel)
-      ? `${typeLabel} - ${planLabel}`
-      : typeLabel
-
-  // 4️⃣ 顯示「你選擇的方案」
+  planDisplay.value = typeLabel && planLabel ? `${typeLabel} - ${planLabel}` : typeLabel
   selectedPlan.value = planDisplay.value
 
-  // 5️⃣ 自動填入拍攝需求下拉
   if (typeLabel && shootType.value === '') {
     shootType.value = typeLabel
   }
 
-  // 6️⃣ 顯示備註（純顯示用）
   if (selectedPlan.value) {
     userNote.value = `【方案】${selectedPlan.value}`
   }
 })
 
+/* ---------- EmailJS 設定 ---------- */
+const EMAILJS_PUBLIC_KEY = '3DH3YZGxSTMbs0gwQ'
 
+/* ---------- 客戶感謝信（EmailJS） ---------- */
+async function thankClient() {
+  try {
+    const templateParams = {
+      to_email: userEmail.value,
+      email: userEmail.value, // 保留，避免你 EmailJS template 還在用
+      user_name: userName.value,
+      name: 'ONE2FRAME',
+      plan_display: planDisplay.value,
+      shoot_full_time: shootFullTime.value
+    }
+
+    await emailjs.send(
+      'service_hymhlfm',      // ✅ 新的 Thanks service
+      'template_k0bj3t8',
+      templateParams,
+      EMAILJS_PUBLIC_KEY
+    )
+
+    console.log('[客戶感謝信寄送成功]')
+  } catch (err) {
+    console.error('[客戶感謝信寄送失敗]', err)
+  }
+}
+
+
+function handleEmailInput() {
+  const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
+  isValidEmail.value = pattern.test(userEmail.value)
+  showEmailError.value = userEmail.value !== '' && !isValidEmail.value
+}
+/* ---------- 客戶感謝信（EmailJS） ---------- */
+/* ---------- ✅ 主提交入口 ---------- */
+async function handleSubmit() {
+  if (isSubmitting.value) return
+  if (!validateForm()) return
+
+  // 樂觀 UI
+  isSubmitting.value = true
+  done.value = true
+  statusMessage.value = ''
+  statusType.value = ''
+
+  try {
+    /* ---------- 同步隱藏欄位（給 EmailJS 用） ---------- */
+    if (form.value) {
+      const fullTimeInput = form.value.querySelector('input[name="shoot_full_time"]')
+      if (fullTimeInput) fullTimeInput.value = shootFullTime.value
+
+      const planInput = form.value.querySelector('input[name="plan_display"]')
+      if (planInput) planInput.value = planDisplay.value
+    }
+
+    /* ---------- 1️⃣ 管理通知信（你自己） ---------- */
+    await emailjs.sendForm(
+      'service_sutp5s9',
+      'template_gw85rci',
+      form.value,
+      '3DH3YZGxSTMbs0gwQ'
+    )
+
+    /* ---------- 2️⃣ 客戶感謝信（不阻斷主流程） ---------- */
+    await thankClient()
+
+    /* ---------- 3️⃣ 寫入 Supabase（資料留存） ---------- */
+    const { error } = await supabase.from('reservations').insert([
+      {
+        user_name: userName.value,
+        user_ig: userIG.value,
+        user_email: userEmail.value,
+
+        shoot_type: shootType.value,
+        shoot_plan: route.query.shoot_plan || '',
+        plan_display: selectedPlan.value,
+
+        shoot_date: shootDate.value,
+        shoot_clock: shootClock.value,
+        shoot_full_time: shootFullTime.value,
+
+        message: userNote.value
+      }
+    ])
+
+    if (error) {
+      console.error('[DB 寫入失敗]', error)
+    } else {
+      console.log('[DB 寫入成功]')
+    }
+
+  } catch (err) {
+    console.error('[提交流程錯誤]', err)
+
+    // 如果你之後想做「部分成功提示」，這裡就是入口
+    // statusMessage.value = '已收到預約，但系統通知發送異常，請稍後確認'
+    // statusType.value = 'warning'
+  }
+}
 
 
 </script>
+
 
 
 
