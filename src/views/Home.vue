@@ -40,15 +40,9 @@
 >
   立即預約
 
-      </router-link>
-      <div class="sub-cta">
-        <router-link to="/ai" class="ai-link">
-          ONE2FRAME拍攝顧問
-        </router-link>
-      </div>
+      
 
-      <router-link to="/ai" class="secondary-link">
-        不確定選哪個？ 先用ONE2FRAME導覽 30 秒 →
+    
       </router-link>
 
 

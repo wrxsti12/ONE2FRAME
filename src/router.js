@@ -2,13 +2,12 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Home from './views/Home.vue'
 import Contact from './views/Contact.vue'
 import Quotation from './views/Quotation.vue'
-import AiGuide from './views/AiGuide.vue'
+
 
 const routes = [
   { path: '/', component: Home, meta: { title: '首頁 | ONE2FRAME' } },
   { path: '/quotation', component: Quotation, meta: { title: '報價單 | ONE2FRAME' } },
   { path: '/contact', component: Contact, meta: { title: '預約拍攝 | ONE2FRAME' } },
-  { path: '/ai', component: AiGuide, meta: { title: 'AI 拍攝導覽 | ONE2FRAME' } },
 ]
 
 const router = createRouter({

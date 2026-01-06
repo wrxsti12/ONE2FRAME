@@ -79,7 +79,8 @@
 
 
       <!-- 保證按鈕永遠存在，只在沒選方案時 disable -->
-<button class="cta-button" :disabled="!canBook" @click="goToContactWithPlan">
+<button class="cta-button" @click="goToContactWithPlan">
+
   我要預約
 </button>
 
@@ -172,13 +173,14 @@ function goToContactWithPlan() {
   const type = inferShootTypeByTitle(title)
 
   router.push({
-    name: 'contact',
-    query: {
-      shoot_type: type,                   // ✅ 新增
-      shoot_plan: selectedPlan.value.plan || '',   // Static / Motion / Reels 都可用
-      shoot_title: title
-    }
-  })
+  path: '/contact',
+  query: {
+    shoot_type: type,
+    shoot_plan: selectedPlan.value.plan || '',
+    shoot_title: title
+  }
+})
+
 }
 
 

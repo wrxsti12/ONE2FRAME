@@ -129,4 +129,6 @@ button:focus-visible {
   box-shadow:
     0 0 0 1px rgba(0, 255, 200, 0.35),
     0 0 14px rgba(0, 255, 200, 0.22);
+
+.weekday-hint { color: #ffcc00; font-size: 12px; margin-top: 4px; }
 }
