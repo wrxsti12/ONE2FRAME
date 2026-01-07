@@ -131,30 +131,19 @@
         <!-- Datepicker -->
 
         <Datepicker
+  v-model="selectedDate"
+  placeholder="請選擇拍攝日期"
+  :enable-time-picker="false"
+  :disabled-dates="disableDates"
+  :teleport="true"
+  class="contact-input"
+  name="shoot_date"
+  required
+  data-aos="fade-up"
+  data-aos-delay="400"
+/>
 
-          v-model="selectedDate"
 
-          placeholder="請選擇拍攝日期"
-
-          :min-date="new Date()"
-
-          :enable-time-picker="false"
-
-          :disabled-dates="disableWeekdays"
-
-          :teleport="true"
-
-          class="contact-input"
-
-          name="shoot_date"
-
-          required
-
-          data-aos="fade-up"
-
-          data-aos-delay="400"
-
-        />
 
 
 
@@ -259,7 +248,6 @@
 
 
 <script setup>
-
 import { ref, computed, watch, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
 import emailjs from '@emailjs/browser'
@@ -285,7 +273,7 @@ const userNote = ref('')
 const shootType = ref('')
 const shootDate = ref('')
 const shootClock = ref('')
-const selectedDate = ref(null)
+const selectedDate = ref(null) // 只宣告一次 ✅
 
 const route = useRoute()
 const selectedPlan = ref('')
@@ -300,8 +288,6 @@ const showEmailError = ref(false)
 const emailErrorMessage = computed(() =>
   showEmailError.value ? '請輸入有效 Email（例如 name@gmail.com）' : ''
 )
-// 修改函數，讓它能接收 Public Key
-
 
 /* ---------- IG 驗證 ---------- */
 const isValidIG = ref(true)
@@ -331,6 +317,35 @@ watch(selectedDate, (val) => {
   shootDate.value = `${yyyy}-${mm}-${dd}`
 })
 
+// 禁用邏輯，只開放 2026 年 1 月平日
+function disableDates(date) {
+  const day = date.getDay()      // 0 = Sunday, 6 = Saturday
+  const month = date.getMonth()  // 0 = January
+  const year = date.getFullYear()
+
+  const today = new Date()
+  today.setHours(0, 0, 0, 0) // 清除時間，保證只比日期
+
+  const diffTime = date.getTime() - today.getTime()
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) // 相差天數
+
+  // 過去日期或前三天內禁用
+  if (diffDays <= 3) return true
+
+  if (year !== 2026) return true // 非2026禁用
+
+  if (month === 0) {
+    // 1月全月開放
+    return false
+  } else {
+    // 2~12月：只開放假日
+    return day !== 0 && day !== 6 // 平日禁用
+  }
+}
+
+
+
+
 /* ---------- 假日限制 ---------- */
 const restrictedPlans = ['動態攝影', 'Reels短片拍攝']
 
@@ -351,10 +366,6 @@ watch([shootDate, selectedPlan], () => {
   }
 })
 
-function disableWeekdays(date) {
-  return ![0, 6].includes(date.getDay())
-}
-
 /* ---------- 顯示完整時間 ---------- */
 const shootFullTime = computed(() => {
   if (!shootDate.value || !shootClock.value) return ''
@@ -362,7 +373,7 @@ const shootFullTime = computed(() => {
   return `${y}年${m}月${d}日 ${shootClock.value}`
 })
 
-/* ---------- ✅ 驗證邏輯（抽乾淨） ---------- */
+/* ---------- 驗證邏輯 ---------- */
 function validateForm() {
   handleIGInput()
   handleEmailInput()
@@ -394,8 +405,6 @@ function validateForm() {
 
   return true
 }
-
-
 
 /* ---------- 初始化（方案同步） ---------- */
 const typeMap = {
@@ -432,7 +441,7 @@ async function thankClient() {
   try {
     const templateParams = {
       to_email: userEmail.value,
-      email: userEmail.value, // 保留，避免你 EmailJS template 還在用
+      email: userEmail.value,
       user_name: userName.value,
       name: 'ONE2FRAME',
       plan_display: planDisplay.value,
@@ -440,7 +449,7 @@ async function thankClient() {
     }
 
     await emailjs.send(
-      'service_hymhlfm',      // ✅ 新的 Thanks service
+      'service_hymhlfm',
       'template_k0bj3t8',
       templateParams,
       EMAILJS_PUBLIC_KEY
@@ -452,26 +461,23 @@ async function thankClient() {
   }
 }
 
-
 function handleEmailInput() {
   const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
   isValidEmail.value = pattern.test(userEmail.value)
   showEmailError.value = userEmail.value !== '' && !isValidEmail.value
 }
-/* ---------- 客戶感謝信（EmailJS） ---------- */
-/* ---------- ✅ 主提交入口 ---------- */
+
+/* ---------- 主提交入口 ---------- */
 async function handleSubmit() {
   if (isSubmitting.value) return
   if (!validateForm()) return
 
-  // 樂觀 UI
   isSubmitting.value = true
   done.value = true
   statusMessage.value = ''
   statusType.value = ''
 
   try {
-    /* ---------- 同步隱藏欄位（給 EmailJS 用） ---------- */
     if (form.value) {
       const fullTimeInput = form.value.querySelector('input[name="shoot_full_time"]')
       if (fullTimeInput) fullTimeInput.value = shootFullTime.value
@@ -480,18 +486,15 @@ async function handleSubmit() {
       if (planInput) planInput.value = planDisplay.value
     }
 
-    /* ---------- 1️⃣ 管理通知信（你自己） ---------- */
     await emailjs.sendForm(
       'service_sutp5s9',
       'template_gw85rci',
       form.value,
-      '3DH3YZGxSTMbs0gwQ'
+      EMAILJS_PUBLIC_KEY
     )
 
-    /* ---------- 2️⃣ 客戶感謝信（不阻斷主流程） ---------- */
     await thankClient()
 
-    /* ---------- 3️⃣ 寫入 Supabase（資料留存） ---------- */
     const { error } = await supabase.from('reservations').insert([
       {
         user_name: userName.value,
@@ -510,23 +513,15 @@ async function handleSubmit() {
       }
     ])
 
-    if (error) {
-      console.error('[DB 寫入失敗]', error)
-    } else {
-      console.log('[DB 寫入成功]')
-    }
+    if (error) console.error('[DB 寫入失敗]', error)
+    else console.log('[DB 寫入成功]')
 
   } catch (err) {
     console.error('[提交流程錯誤]', err)
-
-    // 如果你之後想做「部分成功提示」，這裡就是入口
-    // statusMessage.value = '已收到預約，但系統通知發送異常，請稍後確認'
-    // statusType.value = 'warning'
   }
 }
-
-
 </script>
+
 
 
 
