@@ -4,8 +4,7 @@
     <nav class="main-navbar">
       <router-link to="/" exact-active-class="active">首頁</router-link>
       <router-link to="/quotation" class="nav-link">報價單</router-link>
-      <router-link to="/contact" exact-active-class="active">預約拍攝</router-link>
-      <!-- 🚀 新增進度查詢連結 -->
+      
     </nav>
 
     <!-- ✅ 頁面切換動畫 -->
