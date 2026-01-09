@@ -55,16 +55,37 @@
         </div>
       </div>
 
-      <!-- 優惠方案卡片 -->
+      <!-- 優惠與方案說明卡片 -->
 <div class="bonus-note aos-init aos-animate" data-aos="fade-up" data-aos-delay="650">
-  <p class="bonus-title">📩 優惠細節</p><br />
+  <p class="bonus-title">📩 優惠與方案說明</p><br />
+
   <p class="bonus-desc">
-    ✨ Special 2026 ：<br /><strong>一二月份預約 → ONE2FRAME 紀念物 ✅</strong>
+    ✨ Special 2026：<br />
+    <strong>一、二月份預約 → ONE2FRAME 紀念物 ✅</strong>
   </p><br />
-    靜態 / 動態 同日拍攝<br /><strong> → 享9折優惠 ✅</strong><br /><br />
-    ONE2FRAME ACT ( 曾合作車友 )   <br /><strong>→ 享 NT$200 抵用券 ✅</strong><br /><br />
-    
+
+  靜態 / 動態 同日拍攝<br />
+  <strong>→ 享 9 折優惠 ✅</strong><br /><br />
+
+  ONE2FRAME ACT（曾合作車友）<br />
+  <strong>→ 享 NT$200 抵用券 ✅</strong><br /><br />
+
+  <hr class="bonus-divider" /><br />
+
+  <strong>📸 靜態攝影交付說明</strong><br /><br />
+
+  基礎方案涵蓋人車與車輛之所有照片精修<br />
+  完整方案則額外包含細節特寫照片✅<br /><br />
+
+  照片交付採<strong>非固定張數制</strong><br />
+  會依與車主溝通後的拍攝重點彈性調整✅<br /><br />
+
+  基礎方案<strong>保底 15 張</strong><br />
+  若車主對特定角度或畫面有明確想法<br />
+  總數可能追加至 <strong>20–25 張✅</strong><br /><br />
+
 </div>
+
 
 
 
