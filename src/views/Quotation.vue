@@ -60,8 +60,7 @@
   <p class="bonus-title">📩 優惠與方案說明</p><br />
 
   <p class="bonus-desc">
-    ✨ Special 2026：<br />
-    <strong>一、二月份預約 → ONE2FRAME 紀念物 ✅</strong>
+    ✨ SPECIAL 2026：<br />
   </p><br />
 
   靜態 / 動態 同日拍攝<br />
